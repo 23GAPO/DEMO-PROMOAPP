@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PROMOAPP</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f3f3f3; padding-bottom: 2rem; }
+
+    header { background: #222; color: #fff; padding: 1rem; text-align: center; }
+
+    .container { width: 95%; max-width: 1300px; margin: auto; padding: 1rem 0; }
+
+    /* Barra de búsqueda y filtros */
+    .filtros { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .filtros input, .filtros select { padding: 0.6rem; width: 100%; border-radius: 6px; border: 1px solid #bbb; }
+
+    /* Layout grid */
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+    /* TARJETAS */
+    .card { background: #fff; border-radius: 10px; padding: 1rem; box-shadow: 0 3px 10px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+    .card h3 { margin-bottom: 0.3rem; }
+    .card p { margin-bottom: 0.2rem; }
+
+    /* Promos */
+    .promos .card { background: #ffe9c9; }
+
+    /* Grid de restaurantes */
+    .grid-restaurantes { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+
+    /* Botones de paginación */
+    .paginacion { text-align: center; margin-top: 1rem; }
+    .paginacion button { padding: 0.6rem 1rem; margin: 0 5px; border: none; border-radius: 5px; cursor: pointer; background: #333; color: white; }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PROMOAPP</h1>
+  </header>
+
+  <div class="container">
+
+    <!-- BUSCADOR Y FILTROS -->
+    <div class="filtros">
+      <input type="text" id="buscar" placeholder="Buscar restaurante...">
+      <select id="filtroComida">
+        <option value="">Todos los tipos</option>
+        <option value="tacos">Tacos</option>
+        <option value="carne">Carne</option>
+        <option value="pizza">Pizza</option>
+        <option value="mariscos">Mariscos</option>
+      </select>
+    </div>
+
+    <div class="layout">
+
+      <!-- PROMOCIONES -->
+      <section class="promos" id="promos"></section>
+
+      <!-- RESTAURANTES -->
+      <section>
+        <div id="restaurantes" class="grid-restaurantes">
+</div> <!-- Carruseles generados aquí -->
+        <div class="paginacion" id="paginacion"></div>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+  // BASE DE DATOS DINÁMICA
+  const restaurantesData = [
+    { nombre: "Maax-Pizza", alimentos: "pizza", horario: "11:00 AM - 11:00 PM", telefono: "639-501-1199", direccion: "Aldama 203 A, Centro, 33130 Pedro Meoqui, Chih.", comida: "pizza", imagenes: [
+        "img/restaurantes/el-rey-culichi/1.jpg",
+        "img/restaurantes/el-rey-culichi/2.jpg",
+        "img/restaurantes/el-rey-culichi/3.jpg"
+    ] },
+    { nombre: "La Cabaña Grill", alimentos: "carne", horario: "1:00 PM - 11:00 PM", telefono: "639-222-4444", direccion: "Av. Hidalgo #45", comida: "carne", imagenes: [
+        "img/restaurantes/la-sierra/1.jpg",
+        "img/restaurantes/la-sierra/2.jpg",
+        "img/restaurantes/la-sierra/3.jpg"
+    ] },
+    { nombre: "Pizzería Don Luigi", alimentos: "pizza", horario: "12:00 PM - 10:30 PM", telefono: "639-555-8888", direccion: "Independencia #89", comida: "pizza", imagenes: [
+        "img/restaurantes/area-639/1.jpg",
+        "img/restaurantes/area-639/2.jpg",
+        "img/restaurantes/area-639/3.jpg"
+    ] },
+    { nombre: "Mariscos La Ola", alimentos: "mariscos", horario: "11:00 AM - 9:00 PM", telefono: "639-777-2222", direccion: "Niños Héroes #80", comida: "mariscos", imagenes: [
+        "img/restaurantes/moctezuma/1.jpg",
+        "img/restaurantes/moctezuma/2.jpg",
+        "img/restaurantes/moctezuma/3.jpg"
+    ] },
+    { nombre: "Maax-Pizza", alimentos: "pizza", horario: "11:00 AM - 11:00 PM", telefono: "639-501-1199", direccion: "Aldama 203 A, Centro, 33130 Pedro Meoqui, Chih.", comida: "pizza" },
+    { nombre: "La Cabaña Grill", alimentos: "carne", horario: "1:00 PM - 11:00 PM", telefono: "639-222-4444", direccion: "Av. Hidalgo #45", comida: "carne" },
+    { nombre: "Pizzería Don Luigi", alimentos: "pizza", horario: "12:00 PM - 10:30 PM", telefono: "639-555-8888", direccion: "Independencia #89", comida: "pizza" },
+    { nombre: "Mariscos La Ola", alimentos: "mariscos", horario: "11:00 AM - 9:00 PM", telefono: "639-777-2222", direccion: "Niños Héroes #80", comida: "mariscos" }
+  ];
+
+  const promosData = [
+    { restaurante: "Maax-Pizza", promo: "2 pizza grandes de 1 ingrdiente a solo $269, y 2 pizzas familiares de 1 ingrdiente a solo $299", dia: " Todos los Días" },
+    { restaurante: "La Cabaña Grill", promo: "20% en cortes", dia: "Viernes" },
+    { restaurante: "Pizzería Don Luigi", promo: "Pizza + refresco a $199", dia: "Domingo" }
+  ];
+
+  const restaurantesContainer = document.getElementById('restaurantes');
+  const promosContainer = document.getElementById('promos');
+  const paginacionContainer = document.getElementById('paginacion');
+
+  let paginaActual = 1;
+  const porPagina = 3;
+
+  function renderPromos() {
+    let html = `<h2>Promociones</h2>`;
+    promosData.forEach(p => {
+      html += `<div class='card'><h3>${p.restaurante}</h3><p>${p.dia} — ${p.promo}</p></div>`;
+    });
+    promosContainer.innerHTML = html;
+  }
+
+  function renderRestaurantes(lista) {
+    const inicio = (paginaActual - 1) * porPagina;
+    const paginados = lista.slice(inicio, inicio + porPagina);
+
+    restaurantesContainer.innerHTML = paginados.map(r => `
+      <div class='card'>
+        <h3>${r.nombre}</h3>
+        <p><strong>Comida:</strong> ${r.comida}</p>
+        <p><strong>Horario:</strong> ${r.horario}</p>
+        <p><strong>Tel:</strong> ${r.telefono}</p>
+        <p><strong>Dirección:</strong> ${r.direccion}</p>
+      </div>
+    `).join('');
+
+    renderPaginacion(lista.length);
+  }
+
+  function renderPaginacion(total) {
+    const paginas = Math.ceil(total / porPagina);
+    paginacionContainer.innerHTML = '';
+
+    for (let i = 1; i <= paginas; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i;
+      btn.onclick = () => { paginaActual = i; filtrar(); };
+      paginacionContainer.appendChild(btn);
+    }
+  }
+
+  function filtrar() {
+    const busqueda = document.getElementById('buscar').value.toLowerCase();
+    const comida = document.getElementById('filtroComida').value;
+
+    let resultados = restaurantesData.filter(r => 
+      r.nombre.toLowerCase().includes(busqueda) &&
+      (comida === '' || r.comida === comida)
+    );
+
+    renderRestaurantes(resultados);
+    inicializarCarruseles();
+  }
+
+  document.getElementById('buscar').addEventListener('input', filtrar);
+  document.getElementById('filtroComida').addEventListener('change', filtrar);
+
+  renderPromos();
+  filtrar();
+
+
+  // Carrusel dinámico
+  function inicializarCarruseles() {
+    document.querySelectorAll('.carousel').forEach(carousel => {
+      let index = 0;
+      const imgs = carousel.querySelectorAll('img');
+      const next = carousel.querySelector('.next');
+      const prev = carousel.querySelector('.prev');
+
+      function show(i) {
+        imgs.forEach(img => img.style.display = 'none');
+        imgs[i].style.display = 'block';
+      }
+
+      next.onclick = () => { index = (index + 1) % imgs.length; show(index); };
+      prev.onclick = () => { index = (index - 1 + imgs.length) % imgs.length; show(index); };
+
+      show(0);
+    });
+  }
+
+</script>
+
+</body>
+</html>
