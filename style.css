@@ -1268,12 +1268,18 @@ body::before {
   width: 100%;
   height: 100%;
   background: url("img/Logo.jpg") no-repeat center center;
-  background-size: 100%;       /* Ajusta el tamaño de imagen como marca de agua  */
+  background-size: cover;       /* Ajusta el tamaño de imagen como marca de agua  */
   opacity: 0.30;             /* para la trasparencia*/
   pointer-events: none;      
   z-index: -1;               /* Para que la imagen se vaya al fondo */
+  pointer-events: none;
 }
-
+@media (max-width: 768px) {
+  body::before {
+    background-attachment: scroll;  
+    background-size: cover;        /* el fondo se adapta a los celulares */
+  }
+}
 
 
 .logo-header {
