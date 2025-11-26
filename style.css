@@ -1255,3 +1255,11 @@ header h1 {
     color: var(--color-primary);
     text-decoration: underline;
 }
+/* logo en el fondo */
+body {
+    background-image: url("img/Logo.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 40%;   /* para el tamaño */
+    opacity: 1;
+}
