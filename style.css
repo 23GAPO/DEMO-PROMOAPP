@@ -1276,13 +1276,18 @@ body::before {
 }
 @media (max-width: 768px) {
   body::before {
-    background-attachment: scroll;  
-    background-size: cover;        /* el fondo se adapta a los celulares */
-  }
+     position: fixed;
+    background-attachment: scroll;
+
+    /* esto ajusta la imagen a la pantalla del celulars */
+    background-size: 100% auto; 
+    background-position: center top;
 }
 
+ 
 
 .logo-header {
   height: 75px;
   width: auto;
 }
+ }
